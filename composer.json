@@ -1,0 +1,17 @@
+{
+    "name": "core/php-plug-storage",
+    "description": "Storage provider integrations for the Plug framework",
+    "type": "library",
+    "license": "EUPL-1.2",
+    "require": {
+        "php": "^8.2",
+        "core/php": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Core\\Plug\\Storage\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
