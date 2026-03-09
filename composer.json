@@ -5,7 +5,7 @@
     "license": "EUPL-1.2",
     "require": {
         "php": "^8.2",
-        "core/php": "^1.0"
+        "core/php": "*"
     },
     "autoload": {
         "psr-4": {
