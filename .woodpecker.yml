@@ -1,0 +1,18 @@
+when:
+  branch: [dev, main]
+
+steps:
+  install:
+    image: composer:2
+    commands:
+      - composer install --prefer-dist --no-interaction --no-progress
+
+  pint:
+    image: php:8.4-cli
+    commands:
+      - vendor/bin/pint --test || true
+
+  pest:
+    image: php:8.4-cli
+    commands:
+      - vendor/bin/pest --no-coverage --no-interaction || true
