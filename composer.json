@@ -1,11 +1,11 @@
 {
-    "name": "lthn/php-plug-storage",
+    "name": "dappcore/php-plug-storage",
     "description": "Storage provider integrations for the Plug framework",
     "type": "library",
     "license": "EUPL-1.2",
     "require": {
         "php": "^8.2",
-        "lthn/php": "*"
+        "dappcore/php": "*"
     },
     "autoload": {
         "psr-4": {
