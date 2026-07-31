@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Core\Plug\Storage\Bunny;
 
+use Bunny\Storage\Client;
+use Bunny\Storage\Region;
 use Core\Plug\Concern\BuildsResponse;
 use Core\Plug\Response;
 use Core\Plug\Storage\Contract\Browseable;
-use Bunny\Storage\Client;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -23,11 +24,11 @@ class Browse implements Browseable
 {
     use BuildsResponse;
 
-    protected string $apiKey;
+    protected readonly string $apiKey;
 
-    protected string $storageZone;
+    protected readonly string $storageZone;
 
-    protected string $region;
+    protected readonly string $region;
 
     protected ?Client $client = null;
 
@@ -39,7 +40,7 @@ class Browse implements Browseable
     ) {
         $this->apiKey = $apiKey ?? config("cdn.bunny.{$zone}.api_key", '');
         $this->storageZone = $storageZone ?? config("cdn.bunny.{$zone}.storage_zone", '');
-        $this->region = $region ?? config("cdn.bunny.{$zone}.region", Client::STORAGE_ZONE_FS_EU);
+        $this->region = $region ?? config("cdn.bunny.{$zone}.region", Region::FALKENSTEIN);
     }
 
     /**
@@ -91,6 +92,11 @@ class Browse implements Browseable
 
     /**
      * Check if a file exists.
+     *
+     * Uses the client's own exists() (a lightweight metadata request), not a
+     * full download — the previous implementation fetched the whole file just
+     * to throw the bytes away, which is a real cost against a video or a
+     * multi-GB archive for what should be a single HEAD-style check.
      */
     public function exists(string $path): bool
     {
@@ -99,10 +105,7 @@ class Browse implements Browseable
         }
 
         try {
-            // Try to get the file contents - if it fails, file doesn't exist
-            $this->client()->getContents($path);
-
-            return true;
+            return $this->client()->exists($path);
         } catch (\Exception $e) {
             return false;
         }
@@ -110,6 +113,9 @@ class Browse implements Browseable
 
     /**
      * Get file size in bytes.
+     *
+     * Uses info() (metadata only) rather than downloading the file to measure
+     * strlen() on its contents, for the same reason as exists() above.
      */
     public function size(string $path): ?int
     {
@@ -118,9 +124,7 @@ class Browse implements Browseable
         }
 
         try {
-            $contents = $this->client()->getContents($path);
-
-            return strlen($contents);
+            return $this->client()->info($path)->getSize();
         } catch (\Exception $e) {
             return null;
         }

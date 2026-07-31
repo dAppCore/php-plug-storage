@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Core\Plug\Storage\Bunny;
 
+use Bunny\Storage\Client;
+use Bunny\Storage\Region;
 use Core\Plug\Concern\BuildsResponse;
 use Core\Plug\Response;
 use Core\Plug\Storage\Contract\Deletable;
-use Bunny\Storage\Client;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -22,11 +23,11 @@ class Delete implements Deletable
 {
     use BuildsResponse;
 
-    protected string $apiKey;
+    protected readonly string $apiKey;
 
-    protected string $storageZone;
+    protected readonly string $storageZone;
 
-    protected string $region;
+    protected readonly string $region;
 
     protected ?Client $client = null;
 
@@ -38,7 +39,7 @@ class Delete implements Deletable
     ) {
         $this->apiKey = $apiKey ?? config("cdn.bunny.{$zone}.api_key", '');
         $this->storageZone = $storageZone ?? config("cdn.bunny.{$zone}.storage_zone", '');
-        $this->region = $region ?? config("cdn.bunny.{$zone}.region", Client::STORAGE_ZONE_FS_EU);
+        $this->region = $region ?? config("cdn.bunny.{$zone}.region", Region::FALKENSTEIN);
     }
 
     /**

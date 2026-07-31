@@ -4,4 +4,4 @@ parameters:
     - src
   excludePaths:
     - vendor
-    - tests
+    - tests (?)

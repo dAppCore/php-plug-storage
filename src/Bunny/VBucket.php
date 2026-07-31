@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Core\Plug\Storage\Bunny;
 
+use Bunny\Storage\Client;
+use Bunny\Storage\Region;
 use Core\Crypt\LthnHash;
 use Core\Plug\Concern\BuildsResponse;
 use Core\Plug\Response;
-use Bunny\Storage\Client;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -27,15 +28,15 @@ class VBucket
 {
     use BuildsResponse;
 
-    protected string $domain;
+    protected readonly string $domain;
 
-    protected string $vBucketId;
+    protected readonly string $vBucketId;
 
-    protected string $apiKey;
+    protected readonly string $apiKey;
 
-    protected string $storageZone;
+    protected readonly string $storageZone;
 
-    protected string $region;
+    protected readonly string $region;
 
     protected ?Client $client = null;
 
@@ -50,7 +51,7 @@ class VBucket
         $this->vBucketId = LthnHash::vBucketId($domain);
         $this->apiKey = $apiKey ?? config("cdn.bunny.{$zone}.api_key", '');
         $this->storageZone = $storageZone ?? config("cdn.bunny.{$zone}.storage_zone", '');
-        $this->region = $region ?? config("cdn.bunny.{$zone}.region", Client::STORAGE_ZONE_FS_EU);
+        $this->region = $region ?? config("cdn.bunny.{$zone}.region", Region::FALKENSTEIN);
     }
 
     /**
@@ -264,6 +265,9 @@ class VBucket
 
     /**
      * Check if file exists in vBucket-scoped path.
+     *
+     * Uses the client's own exists() (a lightweight metadata request) rather
+     * than downloading the whole file just to see if the request succeeds.
      */
     public function exists(string $path): bool
     {
@@ -274,9 +278,7 @@ class VBucket
         $scopedPath = $this->path($path);
 
         try {
-            $this->client()->getContents($scopedPath);
-
-            return true;
+            return $this->client()->exists($scopedPath);
         } catch (\Exception $e) {
             return false;
         }

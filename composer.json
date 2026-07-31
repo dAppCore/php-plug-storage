@@ -5,7 +5,8 @@
     "license": "EUPL-1.2",
     "require": {
         "php": "^8.2",
-        "dappcore/php": "*"
+        "dappcore/php": "*",
+        "bunnycdn/storage": "^3.4"
     },
     "autoload": {
         "psr-4": {
@@ -16,5 +17,9 @@
     "prefer-stable": true,
     "replace": {
         "core/php-plug-storage": "self.version"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.30",
+        "phpstan/phpstan": "^2.2"
     }
 }

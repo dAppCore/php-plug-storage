@@ -101,7 +101,7 @@ class StorageManager
      */
     public function upload(): Uploadable
     {
-        return $this->resolve('upload');
+        return $this->resolve('upload', Uploadable::class);
     }
 
     /**
@@ -109,7 +109,7 @@ class StorageManager
      */
     public function download(): Downloadable
     {
-        return $this->resolve('download');
+        return $this->resolve('download', Downloadable::class);
     }
 
     /**
@@ -117,7 +117,7 @@ class StorageManager
      */
     public function delete(): Deletable
     {
-        return $this->resolve('delete');
+        return $this->resolve('delete', Deletable::class);
     }
 
     /**
@@ -125,7 +125,7 @@ class StorageManager
      */
     public function browse(): Browseable
     {
-        return $this->resolve('browse');
+        return $this->resolve('browse', Browseable::class);
     }
 
     /**
@@ -176,8 +176,13 @@ class StorageManager
 
     /**
      * Resolve an operation class for the current driver.
+     *
+     * @template T of object
+     *
+     * @param  class-string<T>  $expected
+     * @return T
      */
-    protected function resolve(string $operation): object
+    protected function resolve(string $operation, string $expected): object
     {
         if (! isset($this->drivers[$this->defaultDriver])) {
             throw new InvalidArgumentException("Storage driver [{$this->defaultDriver}] not registered.");
@@ -190,6 +195,12 @@ class StorageManager
         }
 
         $class = $this->drivers[$this->defaultDriver][$operation];
+
+        if (! is_a($class, $expected, true)) {
+            throw new InvalidArgumentException(
+                "Operation [{$operation}] for storage driver [{$this->defaultDriver}] must implement {$expected}, got {$class}."
+            );
+        }
 
         return new $class(zone: $this->zone);
     }
